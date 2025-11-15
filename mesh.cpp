@@ -13,28 +13,6 @@ struct Point3D {
     double x, y, z;
 };
 
-//de Casteljau algorithm in 2D
-Point2D deCasteljau(const std::vector<Point2D>& points, float t) {
-    std::vector<Point2D> tmp = points;
-    int n = tmp.size();
-    for (int k=1; k<n; ++k) {
-        for (int i=0; i < n-k; ++i) {
-            tmp[i].x = (1 - t) * tmp[i].x + t * tmp[i + 1].x;
-            tmp[i].y = (1 - t) * tmp[i].y + t * tmp[i + 1].y;
-        }
-    }
-    return tmp[0];
-}
-
-// Sample curve uniformly at step 0.1
-std::vector<Point2D> sampleCurve(const std::vector<Point2D>& ctrlPoints) {
-    std::vector<Point2D> samples;
-    for (double t = 0; t <= 1.0; t += 0.1) {
-        samples.push_back(deCasteljau(ctrlPoints, t));
-    }
-    return samples;
-}
-
 //Generate surface of revolution
 void generateSurfaceOfRevolution(const std::vector<Point2D>& curve,
                                  int rotationSteps,
@@ -85,27 +63,26 @@ void writeOFF(const std::string& filename,
 }
 
 int main(){
-    std::vector<Point2D> ctrlPoints = {
-        {0.0, 0.0},
-        {0.8, 1.0},
-        {20.0, 5.0},
-        {1.0, 0.0}
-    };
 
     // 1. Sample the Bézier curve at uniform intervals 0.0 to 1.0 step 0.1
-    std::vector<Point2D> sampledCurve = sampleCurve(ctrlPoints);
+    std::ifstream in("points.txt");
+    std::vector<Point2D> samples;
+    Point2D temp;
+    while (in >> temp.x >> temp.y)
+        samples.push_back(temp);
 
     // 2. Generate the surface of revolution vertices and faces
     std::vector<Point3D> vertices;
     std::vector<std::vector<int>> faces;
     int rotationSteps = 36;  // Revolve in 36 steps (10 degrees each)
-    generateSurfaceOfRevolution(sampledCurve, rotationSteps, vertices, faces);
+    generateSurfaceOfRevolution(samples, rotationSteps, vertices, faces);
 
     // 3. Write to OFF file
     std::string outputFilename = "surface.off";
     writeOFF(outputFilename, vertices, faces);
 
     std::cout << "OFF surface mesh written to " << outputFilename << std::endl;
+    std::cout << std::endl;
 
     return 0;
 }

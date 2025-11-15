@@ -1,8 +1,8 @@
 //TASKS 1 AND 2: implementing the Bezier Curve algorithm and adding editable inputs
 
+#include <cstdio>
 #include <vector>
 #include <GL/glut.h>
-#include <cmath>
 
 #define HEIGHT 400
 #define WIDTH 500
@@ -12,13 +12,16 @@ struct Point {
     float x, y;
 };
 
-//initial list of points
+//initial list of control points
 std::vector<Point> ctrlPoints = {
     {100, 100},
     {150, 300},
     {300, 300},
     {400, 100}
 };
+
+//list of samples (every point on the curve)
+std::vector<Point> samples;
 
 //index of the point in the list which is currently being dragged
 //initially set to -1 (no point being dragged)
@@ -43,6 +46,19 @@ Point deCasteljau(const std::vector<Point>& points, float t) {
     return tmp[0];
 }
 
+std::vector<Point> sampleCurve(const std::vector<Point>& ctrlPoints, float interval) {
+    std::vector<Point> samples;
+    FILE* f = fopen("points.txt", "w");
+    if(!f) return {};
+
+    for (double t = 0; t <= 1.0; t += interval) {
+        samples.push_back(deCasteljau(ctrlPoints, t));
+        fprintf(f, "%f %f\n", samples.back().x, samples.back().y);
+    }
+    fclose(f);
+    return samples;
+}
+
 void motion(int x, int y) {
     if (draggedPoint != -1) {
         ctrlPoints[draggedPoint] = windowToWorld(x, y);
@@ -56,6 +72,7 @@ void mouse(int button, int state, int x, int y) {
 
     if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
         //drag
+        //iteratively finding which point is close to mouse
         for (int i = 0; i < ctrlPoints.size(); ++i) {
             float dx = ctrlPoints[i].x - m.x;
             float dy = ctrlPoints[i].y - m.y;
@@ -110,10 +127,11 @@ void display() {
     glColor3f(0.1f, 0.2f, 1.f);
     glBegin(GL_LINE_STRIP);
     //sampling at interval of 0.01
-    for (float t = 0; t <= 1.0f; t += 0.01f) {
-        Point pt = deCasteljau(ctrlPoints, t);
+    samples=sampleCurve(ctrlPoints, 0.01);
+    
+    for (auto &pt: samples)
         glVertex2f(pt.x, pt.y);
-    }
+    
     glEnd();
 
     glFlush();

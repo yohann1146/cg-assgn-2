@@ -1,35 +1,43 @@
+//TASKS 1 AND 2: implementing the Bezier Curve algorithm and adding editable inputs
+
 #include <vector>
 #include <GL/glut.h>
+#include <cmath>
 
-// Control point structure
-struct Point2D {
+#define HEIGHT 400
+#define WIDTH 500
+
+//structure for 2d coordinate
+struct Point {
     float x, y;
 };
 
-// List of control points (example)
-std::vector<Point2D> ctrlPoints = {
+//initial list of points
+std::vector<Point> ctrlPoints = {
     {100, 100},
     {150, 300},
     {300, 300},
     {400, 100}
 };
 
+//index of the point in the list which is currently being dragged
+//initially set to -1 (no point being dragged)
 int draggedPoint=-1;
 
-Point2D windowToWorld(int x, int y) {
+Point windowToWorld(int x, int y) {
     int w = glutGet(GLUT_WINDOW_WIDTH);
     int h = glutGet(GLUT_WINDOW_HEIGHT);
     return { (float)x, (float)(h - y) };
 }
 
 // de Casteljau algorithm
-Point2D deCasteljau(const std::vector<Point2D>& points, float t) {
-    std::vector<Point2D> tmp = points;
+Point deCasteljau(const std::vector<Point>& points, float t) {
+    std::vector<Point> tmp = points;
     int n = tmp.size();
-    for (int k = 1; k < n; ++k) {
-        for (int i = 0; i < n - k; ++i) {
-            tmp[i].x = (1 - t) * tmp[i].x + t * tmp[i + 1].x;
-            tmp[i].y = (1 - t) * tmp[i].y + t * tmp[i + 1].y;
+    for (int k=1; k<n; ++k) {
+        for (int i=0; i<n-k; ++i) {
+            tmp[i].x = (1-t)*tmp[i].x + t*tmp[i + 1].x;
+            tmp[i].y = (1-t)*tmp[i].y + t*tmp[i + 1].y;
         }
     }
     return tmp[0];
@@ -43,28 +51,31 @@ void motion(int x, int y) {
 }
 
 void mouse(int button, int state, int x, int y) {
-    Point2D m = windowToWorld(x, y);
-    const float threshold = 10.0f; // Pixel tolerance for point selection
+    Point m = windowToWorld(x, y);
+    const float threshold = 10.0f; //threshold for how near the mouse needs to be to the point
 
     if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
-        // Check if clicking near a point for deletion or drag
+        //drag
         for (int i = 0; i < ctrlPoints.size(); ++i) {
             float dx = ctrlPoints[i].x - m.x;
             float dy = ctrlPoints[i].y - m.y;
             if (dx*dx + dy*dy < threshold*threshold) {
-                draggedPoint = i; // Begin drag
+                draggedPoint = i;
                 return;
             }
         }
-        // Add new point
+        
         ctrlPoints.push_back(m);
         glutPostRedisplay();
     }
+
+    //release
     else if (button == GLUT_LEFT_BUTTON && state == GLUT_UP) {
-        if (draggedPoint != -1) draggedPoint = -1; // End drag
+        if (draggedPoint != -1) draggedPoint = -1;      //set index to default now
     }
+
     else if (button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN) {
-        // Right click to delete point
+        //delete
         for (int i = 0; i < ctrlPoints.size(); ++i) {
             float dx = ctrlPoints[i].x - m.x;
             float dy = ctrlPoints[i].y - m.y;
@@ -77,18 +88,17 @@ void mouse(int button, int state, int x, int y) {
     }
 }
 
-// Render function for OpenGL
 void display() {
     glClear(GL_COLOR_BUFFER_BIT);
 
-    // Draw control polygon
+    //draw polygon enclosing the pts
     glColor3f(0.9f, 0.9f, 0.9f);
     glBegin(GL_LINE_STRIP);
     for (auto& p : ctrlPoints)
         glVertex2f(p.x, p.y);
     glEnd();
 
-    // Draw control points
+    //draw points
     glPointSize(8);
     glColor3f(1.f, 0.f, 0.f);
     glBegin(GL_POINTS);
@@ -96,11 +106,12 @@ void display() {
         glVertex2f(p.x, p.y);
     glEnd();
 
-    // Draw Bézier curve
+    //draw curve
     glColor3f(0.1f, 0.2f, 1.f);
     glBegin(GL_LINE_STRIP);
+    //sampling at interval of 0.01
     for (float t = 0; t <= 1.0f; t += 0.01f) {
-        Point2D pt = deCasteljau(ctrlPoints, t);
+        Point pt = deCasteljau(ctrlPoints, t);
         glVertex2f(pt.x, pt.y);
     }
     glEnd();
@@ -110,14 +121,14 @@ void display() {
 
 void init() {
     glClearColor(1, 1, 1, 1);
-    gluOrtho2D(0, 500, 0, 400); // Set window size
+    gluOrtho2D(0, WIDTH, 0, HEIGHT);
 }
 
 int main(int argc, char** argv) {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
-    glutInitWindowSize(500, 400);
-    glutCreateWindow("de Casteljau Bezier Curve Newlol");
+    glutInitWindowSize(WIDTH, HEIGHT);
+    glutCreateWindow("2D Bezier Curve");
     init();
     glutMouseFunc(mouse);
     glutMotionFunc(motion);

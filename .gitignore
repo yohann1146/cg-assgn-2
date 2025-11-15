@@ -39,3 +39,7 @@
 
 # debug information files
 *.dwo
+
+#my workspace files:
+tasks.json
+c_cpp_properties.json

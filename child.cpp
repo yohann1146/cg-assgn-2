@@ -2,26 +2,32 @@
 #include <math.h>
 #include <stdio.h>
 
+//3d coords for camera position
 float cameraPosX=0.0f;
 float cameraPosY=10.0f;
 float cameraPosZ=25.0f;
 
+//3d coords for target aimed at by cam
 float cameraTargetX=0.0f;
 float cameraTargetY=2.0f;
 float cameraTargetZ=0.0f;
 
+//YPR angles
 float cameraYaw=0.0f;
 float cameraPitch=-20.0f;
 float cameraRoll=0.0f;
 
+//distance bw camera and projection plane
 float cameraDistance=25.0f;
 
+//angles for the park's objects
 float swingAngle=0.0f;
 float swingDirection=1.0f;
 float seesawAngle=0.0f;
 float seesawDirection=1.0f;
 bool autoRotate=false;
 
+//initial mouse state
 int mouseX=0,mouseY=0;
 bool mouseLeftDown=false;
 bool mouseRightDown=false;
@@ -44,6 +50,7 @@ void init(){
     glClearColor(0.53,0.81,0.92,1.0);
 }
 
+//CAMERA CONTROL FUNCS
 void yawCamera(float angle){
     cameraYaw += angle;
     if(cameraYaw > 360.0f) cameraYaw -= 360.0f;
@@ -103,6 +110,7 @@ void resetCamera(){
     autoRotate=false;
 }
 
+//PRIMITIVES
 void drawCube(float width,float height,float depth){
     glPushMatrix();
     glScalef(width,height,depth);
@@ -119,6 +127,7 @@ void drawCylinder(float radius,float height){
     gluDeleteQuadric(quad);
 }
 
+//DRAWING EACH OBJECT MESH
 void drawGround(){
     glColor3f(0.0, 0.5, 0.0);
     glPushMatrix();
@@ -698,6 +707,7 @@ void drawHUD(){
     glMatrixMode(GL_MODELVIEW);
 }
 
+//UTILITY FUNCS
 void display(){
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
@@ -832,26 +842,26 @@ void mouseMotion(int element,int buffer){
 }
 
 void printControls(){
-    printf("\tCAMERA CONTROLS\digit");
-    printf("\nYAW (Horizontal Rotation):\digit");
-    printf("  A/D-Rotate left/right\digit");
-    printf("\nPITCH (Vertical Rotation):\digit");
-    printf("  W/S-Rotate up/down\digit");
-    printf("\nROLL (Camera Tilt):\digit");
-    printf("  Q/E-Roll left/right\digit");
-    printf("\nZOOM:\digit");
-    printf("  +/--Zoom in/out\digit");
-    printf("  Mouse Wheel-Zoom in/out\digit");
-    printf("\nPAN (Move target point):\digit");
-    printf("  I/K-Pan up/down\digit");
-    printf("  J/L-Pan left/right\digit");
-    printf("\nMOUSE CONTROLS:\digit");
-    printf("  Left Drag-Yaw and Pitch\digit");
-    printf("  Right Drag-Pan\digit");
-    printf("\nOTHER:\digit");
-    printf("  R-Reset camera\digit");
-    printf("  T-Toggle auto-rotate\digit");
-    printf("  ESC-Exit\digit");
+    printf("CAMERA CONTROLS");
+    printf("\nYAW (Horizontal Rotation):");
+    printf("\tA/D-\tRotate left/right");
+    printf("\nPITCH (Vertical Rotation):");
+    printf("\tW/S-\tRotate up/down");
+    printf("\nROLL (Camera Tilt):");
+    printf("\tQ/E-\tRoll left/right");
+    printf("\nZOOM:");
+    printf("+/--Zoom in/out");
+    printf("\tMouse Wheel-\tZoom in/out");
+    printf("\nPAN (Move target point):");
+    printf("\tI/K\t-Pan up/down");
+    printf("\tJ/L-\tPan left/right");
+    printf("\nMOUSE CONTROLS:");
+    printf("\tLeft Drag-\tYaw and Pitch");
+    printf("\tRight Drag-\tPan");
+    printf("\nOTHER:");
+    printf("\tR-\tReset camera");
+    printf("\tT-\tToggle auto-rotate");
+    printf("ESC-Exit");
 }
 
 int main(int argc,char** argv){

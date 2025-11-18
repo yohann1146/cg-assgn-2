@@ -30,7 +30,7 @@ int draggedPoint=-1;
 Point windowToWorld(int x, int y) {
     int w = glutGet(GLUT_WINDOW_WIDTH);
     int h = glutGet(GLUT_WINDOW_HEIGHT);
-    return { (float)x, (float)(h - y) };
+    return {(float)x, (float)(h - y)};
 }
 
 // de Casteljau algorithm
@@ -46,6 +46,7 @@ Point deCasteljau(const std::vector<Point>& points, float t) {
     return tmp[0];
 }
 
+//function to find list of points on curve at a fixed sample rate
 std::vector<Point> sampleCurve(const std::vector<Point>& ctrlPoints, float interval) {
     std::vector<Point> samples;
     FILE* f = fopen("points.txt", "w");
@@ -59,6 +60,7 @@ std::vector<Point> sampleCurve(const std::vector<Point>& ctrlPoints, float inter
     return samples;
 }
 
+//glut motion func for moving while pressing
 void motion(int x, int y) {
     if (draggedPoint != -1) {
         ctrlPoints[draggedPoint] = windowToWorld(x, y);
@@ -66,9 +68,10 @@ void motion(int x, int y) {
     }
 }
 
+//glut func for mouseclick
 void mouse(int button, int state, int x, int y) {
     Point m = windowToWorld(x, y);
-    const float threshold = 10.0f; //threshold for how near the mouse needs to be to the point
+    const float threshold = 10.0f; //how near the mouse needs to be to the point
 
     if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
         //drag

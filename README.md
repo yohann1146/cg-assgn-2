@@ -10,3 +10,6 @@ g++ castle.cpp -IC:"\MinGW\freeglut\include" -LC:"\MinGW\freeglut\lib" -lfreeglu
 
 ## RUN TASK 3(mesh.cpp):
 g++ mesh.cpp -o mesh.exe
+
+##RUN TASK 3(park.cpp)
+g++ park.cpp -IC:"\MinGW\freeglut\include" -LC:"\MinGW\freeglut\lib" -lfreeglut -lopengl32 -lglu32 -o park.exe

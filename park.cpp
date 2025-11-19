@@ -2,32 +2,27 @@
 #include <math.h>
 #include <stdio.h>
 
-//3d coords for camera position
+
 float cameraPosX=0.0f;
 float cameraPosY=10.0f;
 float cameraPosZ=25.0f;
 
-//3d coords for target aimed at by cam
 float cameraTargetX=0.0f;
 float cameraTargetY=2.0f;
 float cameraTargetZ=0.0f;
 
-//YPR angles
 float cameraYaw=0.0f;
 float cameraPitch=-20.0f;
 float cameraRoll=0.0f;
 
-//distance bw camera and projection plane
 float cameraDistance=25.0f;
 
-//angles for the park's objects
 float swingAngle=0.0f;
 float swingDirection=1.0f;
 float seesawAngle=0.0f;
 float seesawDirection=1.0f;
 bool autoRotate=false;
 
-//initial mouse state
 int mouseX=0,mouseY=0;
 bool mouseLeftDown=false;
 bool mouseRightDown=false;
@@ -39,6 +34,7 @@ void init(){
     glEnable(GL_COLOR_MATERIAL);
     glColorMaterial(GL_FRONT,GL_AMBIENT_AND_DIFFUSE);
 
+    //Light source properties
     GLfloat light_position[]={10.0,20.0,10.0,1.0};
     GLfloat light_ambient[]={0.3,0.3,0.3,1.0};
     GLfloat light_diffuse[]={1.0,1.0,1.0,1.0};
@@ -51,12 +47,14 @@ void init(){
 }
 
 //CAMERA CONTROL FUNCS
+//Rotates the camera horizontally
 void yawCamera(float angle){
     cameraYaw += angle;
     if(cameraYaw > 360.0f) cameraYaw -= 360.0f;
     if(cameraYaw < 0.0f) cameraYaw += 360.0f;
 }
 
+//Rotates the camera vertically
 void pitchCamera(float angle){
     cameraPitch += angle;
 
@@ -64,18 +62,21 @@ void pitchCamera(float angle){
     if(cameraPitch < -89.0f) cameraPitch=-89.0f;
 }
 
+//Rolls the camera
 void rollCamera(float angle){
     cameraRoll += angle;
     if(cameraRoll > 360.0f) cameraRoll -= 360.0f;
     if(cameraRoll < 0.0f) cameraRoll += 360.0f;
 }
 
+//Zooms the camera in and out
 void zoomCamera(float delta){
     cameraDistance += delta;
     if(cameraDistance < 5.0f) cameraDistance=5.0f;
     if(cameraDistance > 50.0f) cameraDistance=50.0f;
 }
 
+//Pans the camera's target point
 void panCamera(float deltaX,float deltaY){
 
     float panSpeed=0.05f;
@@ -90,6 +91,7 @@ void panCamera(float deltaX,float deltaY){
     cameraTargetY += deltaY*panSpeed;
 }
 
+//Updates the camera's position based on orientation and distance
 void updateCameraPosition(){
     float yawRad=cameraYaw*M_PI/180.0f;
     float pitchRad=cameraPitch*M_PI/180.0f;
@@ -99,6 +101,7 @@ void updateCameraPosition(){
     cameraPosZ=cameraTargetZ+cameraDistance*cos(pitchRad)*cos(yawRad);
 }
 
+//Resets the camera to its initial position and orientation
 void resetCamera(){
     cameraTargetX=0.0f;
     cameraTargetY=2.0f;
@@ -110,7 +113,7 @@ void resetCamera(){
     autoRotate=false;
 }
 
-//PRIMITIVES
+//Draws a cube with a specified width, height, and depth
 void drawCube(float width,float height,float depth){
     glPushMatrix();
     glScalef(width,height,depth);
@@ -118,6 +121,7 @@ void drawCube(float width,float height,float depth){
     glPopMatrix();
 }
 
+//Draws a cylinder with a specified radius and height
 void drawCylinder(float radius,float height){
     GLUquadric* quad=gluNewQuadric();
     glPushMatrix();
@@ -127,7 +131,7 @@ void drawCylinder(float radius,float height){
     gluDeleteQuadric(quad);
 }
 
-//DRAWING EACH OBJECT MESH
+//Draws the ground plane
 void drawGround(){
     glColor3f(0.0, 0.5, 0.0);
     glPushMatrix();
@@ -136,11 +140,13 @@ void drawGround(){
     glPopMatrix();
 }
 
+//Draws a toy bucket at a specified position and rotation
 void drawBucket(float element, float buffer, float remaining, float rotation){
     glPushMatrix();
     glTranslatef(element, buffer, remaining);
     glRotatef(rotation, 0, 1, 0);
 
+    //Bucket body
     glColor3f(1.0, 0.2, 0.2);
     glPushMatrix();
     GLUquadric* quad = gluNewQuadric();
@@ -149,6 +155,7 @@ void drawBucket(float element, float buffer, float remaining, float rotation){
     gluDeleteQuadric(quad);
     glPopMatrix();
 
+    //Bucket base
     glPushMatrix();
     glRotatef(-90, 1, 0, 0);
     glTranslatef(0, 0, 0.001);
@@ -157,6 +164,7 @@ void drawBucket(float element, float buffer, float remaining, float rotation){
     gluDeleteQuadric(disk);
     glPopMatrix();
 
+    //Bucket handle
     glColor3f(0.8, 0.8, 0.0);
     glPushMatrix();
     glTranslatef(0, 0.35, 0);
@@ -167,17 +175,20 @@ void drawBucket(float element, float buffer, float remaining, float rotation){
     glPopMatrix();
 }
 
+//Draws a sandcastle at a specified position
 void drawSandCastle(float element, float buffer, float remaining){
     glPushMatrix();
     glTranslatef(element, buffer, remaining);
 
     glColor3f(0.96, 0.64, 0.38);
 
+    //Main tower
     glPushMatrix();
     glTranslatef(0, 0.15, 0);
     drawCylinder(0.3, 0.3);
     glPopMatrix();
 
+    //Main tower roof
     glPushMatrix();
     glTranslatef(0, 0.45, 0);
     GLUquadric* quad = gluNewQuadric();
@@ -186,6 +197,7 @@ void drawSandCastle(float element, float buffer, float remaining){
     gluDeleteQuadric(quad);
     glPopMatrix();
 
+    //Side towers
     for(int counter = 0; counter < 3; counter++){
         float angle = counter * 120.0;
         glPushMatrix();
@@ -198,13 +210,16 @@ void drawSandCastle(float element, float buffer, float remaining){
     glPopMatrix();
 }
 
+//Draws the entire sandpit area
 void drawSandPit(){
+    //Sand
     glColor3f(0.96,0.64,0.38);
     glPushMatrix();
     glTranslatef(-10,0.1,-10);
     drawCube(8,0.2,8);
     glPopMatrix();
 
+    //Wooden border
     glColor3f(0.55,0.27,0.07);
     for(int index=0; index < 4; index++){
         glPushMatrix();
@@ -215,12 +230,15 @@ void drawSandPit(){
         glPopMatrix();
     }
 
+    //Buckets in the sandpit
     drawBucket(-11.5, 0.2, -8.5, 25);
     drawBucket(-8, 0.2, -11, -15);
     drawBucket(-12, 0.2, -12, 45);
 
+    //Sandcastle in the sandpit
     drawSandCastle(-9, 0.2, -9);
 
+    //Sand piles
     glColor3f(0.94, 0.62, 0.36);
     glPushMatrix();
     glTranslatef(-11, 0.2, -10.5);
@@ -235,16 +253,19 @@ void drawSandPit(){
     glPopMatrix();
 }
 
+//Draws a table at a specified position
 void drawTable(float element,float buffer,float remaining){
     glPushMatrix();
     glTranslatef(element,buffer,remaining);
 
+    //Tabletop
     glColor3f(0.72,0.45,0.20);
     glPushMatrix();
     glTranslatef(0,1.5,0);
     drawCube(3,0.2,2);
     glPopMatrix();
 
+    //Table legs
     glColor3f(0.55,0.27,0.07);
     float legPositions[4][2]={{1.3,0.9},{1.3,-0.9},{-1.3,0.9},{-1.3,-0.9}};
     for(int index=0; index < 4; index++){
@@ -257,17 +278,20 @@ void drawTable(float element,float buffer,float remaining){
     glPopMatrix();
 }
 
+//Draws a park bench at a specified position and rotation
 void drawBench(float element,float buffer,float remaining,float rotation){
     glPushMatrix();
     glTranslatef(element,buffer,remaining);
     glRotatef(rotation,0,1,0);
 
+    //Seat
     glColor3f(0.72,0.45,0.20);
     glPushMatrix();
     glTranslatef(0,0.8,0);
     drawCube(2.5,0.15,0.8);
     glPopMatrix();
 
+    //Backrest
     glPushMatrix();
     glTranslatef(0,1.3,-0.35);
     drawCube(2.5,0.15,0.1);
@@ -278,6 +302,7 @@ void drawBench(float element,float buffer,float remaining,float rotation){
     drawCube(2.5,0.1,0.15);
     glPopMatrix();
 
+    //Legs
     glColor3f(0.4,0.4,0.4);
     float legPos[4][2]={{1.0,0.3},{1.0,-0.3},{-1.0,0.3},{-1.0,-0.3}};
     for(int index=0; index < 4; index++){
@@ -290,10 +315,12 @@ void drawBench(float element,float buffer,float remaining,float rotation){
     glPopMatrix();
 }
 
+//Draws the swing set
 void drawSwingSet(){
     glPushMatrix();
     glTranslatef(8,0,-5);
 
+    //Frame
     glColor3f(0.8,0.0,0.0);
     glPushMatrix();
     glTranslatef(-2.5,2,0);
@@ -311,17 +338,20 @@ void drawSwingSet(){
     drawCylinder(0.15,5);
     glPopMatrix();
 
+    //Swings
     for(int index=-1; index <= 1; index += 2){
         glPushMatrix();
         glTranslatef(index*1.5,3,0);
         glRotatef(swingAngle*index,1,0,0);
 
+        //Chains
         glColor3f(0.3,0.3,0.3);
         glPushMatrix();
         glTranslatef(0,-1,0);
         drawCylinder(0.05,2);
         glPopMatrix();
 
+        //Seat
         glColor3f(1.0,0.8,0.0);
         glPushMatrix();
         glTranslatef(0,-2,0);
@@ -334,16 +364,19 @@ void drawSwingSet(){
     glPopMatrix();
 }
 
+//Draws the slide
 void drawSlide(){
     glPushMatrix();
     glTranslatef(-8,0,5);
 
+    //Platform
     glColor3f(0.0,0.5,1.0);
     glPushMatrix();
     glTranslatef(0,2,0);
     drawCube(2,0.2,2);
     glPopMatrix();
 
+    //Platform legs
     glColor3f(0.7,0.7,0.7);
     float legPos[4][2]={{0.9,0.9},{0.9,-0.9},{-0.9,0.9},{-0.9,-0.9}};
     for(int index=0; index < 4; index++){
@@ -357,6 +390,7 @@ void drawSlide(){
 
     glTranslatef(0, 0, 0.6);
 
+    //Slide
     glColor3f(1.0,0.0,0.0);
     glPushMatrix();
     glTranslatef(0,1,2);
@@ -364,6 +398,7 @@ void drawSlide(){
     drawCube(1.5,0.1,4);
     glPopMatrix();
 
+    //Slide sides
     glColor3f(0.9,0.1,0.1);
     for(int index=-1; index <= 1; index += 2){
         glPushMatrix();
@@ -375,6 +410,7 @@ void drawSlide(){
 
     glPopMatrix();
 
+    //Ladder
     glColor3f(0.5,0.5,0.5);
     for(int index=0; index < 5; index++){
         glPushMatrix();
@@ -383,6 +419,7 @@ void drawSlide(){
         glPopMatrix();
     }
 
+    //Ladder frame
     for(int index=-1; index <= 1; index += 2){
         glPushMatrix();
         glTranslatef(index*0.4,1,-1);
@@ -393,16 +430,19 @@ void drawSlide(){
     glPopMatrix();
 }
 
+//Draws the seesaw
 void drawSeesaw(){
     glPushMatrix();
     glTranslatef(0,0,8);
 
+    //Base
     glColor3f(0.5,0.5,0.5);
     glPushMatrix();
     glTranslatef(0,0.5,0);
     drawCube(0.3,1,0.3);
     glPopMatrix();
 
+    //Plank
     glPushMatrix();
     glTranslatef(0,1,0);
     glRotatef(seesawAngle,0,0,1);
@@ -410,6 +450,7 @@ void drawSeesaw(){
     glColor3f(0.72,0.45,0.20);
     drawCube(5,0.2,0.8);
 
+    //Handles
     glColor3f(1.0,0.0,0.0);
     for(int index=-1; index <= 1; index += 2){
         glPushMatrix();
@@ -422,22 +463,26 @@ void drawSeesaw(){
     glPopMatrix();
 }
 
+//Draws the merry-go-round
 void drawMerryGoRound(){
     glPushMatrix();
     glTranslatef(8,0,8);
 
+    //Center pole
     glColor3f(0.7,0.7,0.7);
     glPushMatrix();
     glTranslatef(0,0.75,0);
     drawCylinder(0.15,1.5);
     glPopMatrix();
 
+    //Platform
     glColor3f(1.0,0.8,0.0);
     glPushMatrix();
     glTranslatef(0,0.3,0);
     drawCylinder(2,0.2);
     glPopMatrix();
 
+    //Handles
     glColor3f(0.0,0.5,1.0);
     for(int index=0; index < 4; index++){
         glPushMatrix();
@@ -450,10 +495,12 @@ void drawMerryGoRound(){
     glPopMatrix();
 }
 
+//Draws the monkey bars
 void drawMonkeyBars(){
     glPushMatrix();
     glTranslatef(-8,0,-3);
 
+    //Frame
     glColor3f(0.8,0.0,0.0);
     for(int index=0; index < 2; index++){
         for(int jdx=0; jdx < 2; jdx++){
@@ -466,6 +513,7 @@ void drawMonkeyBars(){
 
     glColor3f(0.5,0.5,0.5);
 
+    //Horizontal bars
     for(int index=0; index < 4; index++){
         glPushMatrix();
         glTranslatef(1.8,3,-1.5+index*1.0);
@@ -474,6 +522,7 @@ void drawMonkeyBars(){
         glPopMatrix();
     }
 
+    //Vertical bars
     for(int index=0; index < 6; index++){
         glPushMatrix();
         glTranslatef(-2+index*0.8,3,-1.6);
@@ -485,16 +534,19 @@ void drawMonkeyBars(){
     glPopMatrix();
 }
 
+//Draws a tree at a specified position
 void drawTree(float element,float remaining){
     glPushMatrix();
     glTranslatef(element,0,remaining);
 
+    //Trunk
     glColor3f(0.55,0.27,0.07);
     glPushMatrix();
     glTranslatef(0,0,0);
     drawCylinder(0.3,5);
     glPopMatrix();
 
+    //Foliage
     glColor3f(0.13,0.55,0.13);
     glPushMatrix();
     glTranslatef(0,4,0);
@@ -504,16 +556,19 @@ void drawTree(float element,float remaining){
     glPopMatrix();
 }
 
+//Draws a fountain at a specified position
 void drawFountain(float element,float remaining){
     glPushMatrix();
     glTranslatef(element,0,remaining);
 
+    //Base
     glColor3f(0.6,0.6,0.6);
     glPushMatrix();
     glTranslatef(0,0.4,0);
     drawCylinder(0.4,0.8);
     glPopMatrix();
 
+    //Water
     glColor3f(0.4,0.6,0.8);
     glPushMatrix();
     glTranslatef(0,0.9,0);
@@ -521,6 +576,7 @@ void drawFountain(float element,float remaining){
     glutSolidSphere(0.5,20,20);
     glPopMatrix();
 
+    //Spout
     glColor3f(0.7,0.7,0.7);
     glPushMatrix();
     glTranslatef(0,0.9,0);
@@ -531,6 +587,7 @@ void drawFountain(float element,float remaining){
     glPopMatrix();
 }
 
+//Draws a single fence post
 void drawFencePost(float data, float remaining){
     glColor3f(0.4, 0.3, 0.2);
     glPushMatrix();
@@ -545,6 +602,7 @@ void drawFencePost(float data, float remaining){
     glPopMatrix();
 }
 
+//Draws a section of fence between two points
 void drawFenceSection(float x1, float z1, float x2, float z2){
 
     glColor3f(0.5, 0.4, 0.3);
@@ -554,12 +612,14 @@ void drawFenceSection(float x1, float z1, float x2, float z2){
     float length = sqrt(dx*dx + dz*dz);
     float angle = atan2(dx, dz) * 180.0 / M_PI;
 
+    //Top rail
     glPushMatrix();
     glTranslatef((x1+x2)/2, 1.2, (z1+z2)/2);
     glRotatef(angle, 0, 1, 0);
     drawCube(0.1, 0.1, length);
     glPopMatrix();
 
+    //Bottom rail
     glPushMatrix();
     glTranslatef((x1+x2)/2, 0.5, (z1+z2)/2);
     glRotatef(angle, 0, 1, 0);
@@ -567,10 +627,12 @@ void drawFenceSection(float x1, float z1, float x2, float z2){
     glPopMatrix();
 }
 
+//Draws the entire park fence
 void drawParkFence(){
     float fenceDistance = 18.0;
     float postSpacing = 3.0;
 
+    //Front fence sections
     for(float data = -fenceDistance; data <= -4.0; data += postSpacing){
         float nextX = data + postSpacing;
         if(nextX > -4.0) nextX = -4.0;
@@ -589,9 +651,11 @@ void drawParkFence(){
         }
     }
 
+    //Gate posts
     drawFencePost(-4.0, -fenceDistance);
     drawFencePost(4.0, -fenceDistance);
 
+    //Back fence
     for(float data = -fenceDistance; data <= fenceDistance; data += postSpacing){
         float nextX = data + postSpacing;
         if(nextX > fenceDistance) nextX = fenceDistance;
@@ -601,6 +665,7 @@ void drawParkFence(){
         }
     }
 
+    //Left fence
     for(float remaining = -fenceDistance; remaining <= fenceDistance; remaining += postSpacing){
         float nextZ = remaining + postSpacing;
         if(nextZ > fenceDistance) nextZ = fenceDistance;
@@ -610,6 +675,7 @@ void drawParkFence(){
         }
     }
 
+    //Right fence
     for(float remaining = -fenceDistance; remaining <= fenceDistance; remaining += postSpacing){
         float nextZ = remaining + postSpacing;
         if(nextZ > fenceDistance) nextZ = fenceDistance;
@@ -620,10 +686,12 @@ void drawParkFence(){
     }
 }
 
+//Draws the pathways in the park
 void drawPathways(){
     glDisable(GL_LIGHTING);
     glColor3f(0.3, 0.3, 0.3);
 
+    //Main pathways
     glPushMatrix();
     glTranslatef(0, 0.01, 0);
     drawCube(3.0, 0.02, 36);
@@ -634,6 +702,7 @@ void drawPathways(){
     drawCube(32, 0.02, 3.0);
     glPopMatrix();
 
+    //Connecting pathways
     glPushMatrix();
     glTranslatef(8, 0.01, -2.5);
     drawCube(3.0, 0.02, 8);
@@ -669,6 +738,7 @@ void drawPathways(){
 
 void drawHUD(){
 
+    //Switch to 2D orthographic projection
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
     glLoadIdentity();
@@ -683,6 +753,7 @@ void drawHUD(){
 
     glColor3f(1.0,1.0,1.0);
 
+    //Display camera orientation and zoom
     char info[256];
     sprintf(info,"Yaw: %.1f  Pitch: %.1f  Roll: %.1f  Zoom: %.1f",
             cameraYaw,cameraPitch,cameraRoll,cameraDistance);
@@ -692,12 +763,14 @@ void drawHUD(){
         glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12,*c);
     }
 
+    //Display camera target coordinates
     sprintf(info,"Target: (%.1f,%.1f,%.1f)",cameraTargetX,cameraTargetY,cameraTargetZ);
     glRasterPos2i(10,750);
     for(char* c=info; *c != '\0'; c++){
         glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12,*c);
     }
 
+    //Restore 3D projection and settings
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_LIGHTING);
 
@@ -707,19 +780,20 @@ void drawHUD(){
     glMatrixMode(GL_MODELVIEW);
 }
 
-//UTILITY FUNCS
 void display(){
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
 
     updateCameraPosition();
 
+    //Set up the camera view
     gluLookAt(cameraPosX,cameraPosY,cameraPosZ,
               cameraTargetX,cameraTargetY,cameraTargetZ,
               0,1,0);
 
     glRotatef(cameraRoll,0,0,1);
 
+    //Draw all park elements
     drawGround();
     drawPathways();
     drawParkFence();
@@ -746,6 +820,7 @@ void display(){
     glutSwapBuffers();
 }
 
+//Called when the window is resized
 void reshape(int w,int h){
     glViewport(0,0,w,h);
     glMatrixMode(GL_PROJECTION);
@@ -753,18 +828,20 @@ void reshape(int w,int h){
     gluPerspective(60.0,(double)w/(double)h,0.1,100.0);
     glMatrixMode(GL_MODELVIEW);
 }
-
 void timer(int value){
+    //Animate swing
     swingAngle += swingDirection*0.5;
     if(swingAngle > 20 || swingAngle < -20){
         swingDirection *= -1;
     }
 
+    //Animate seesaw
     seesawAngle += seesawDirection*0.3;
     if(seesawAngle > 15 || seesawAngle < -15){
         seesawDirection *= -1;
     }
 
+    //Auto-rotate camera
     if(autoRotate){
         yawCamera(0.3);
     }
@@ -772,10 +849,10 @@ void timer(int value){
     glutPostRedisplay();
     glutTimerFunc(16,timer,0);
 }
-
 void keyboard(unsigned char key,int element,int buffer){
     switch(key){
 
+        //Camera rotation
         case 'a': case 'A': yawCamera(-2.0f); break;
         case 'd': case 'D': yawCamera(2.0f); break;
 
@@ -785,14 +862,17 @@ void keyboard(unsigned char key,int element,int buffer){
         case 'q': case 'Q': rollCamera(-2.0f); break;
         case 'e': case 'E': rollCamera(2.0f); break;
 
+        //Camera zoom
         case '+': case '=': zoomCamera(-1.0f); break;
         case '-': case '_': zoomCamera(1.0f); break;
 
+        //Camera panning
         case 'step': case 'J': panCamera(-1.0f,0.0f); break;
         case 'l': case 'L': panCamera(1.0f,0.0f); break;
         case 'counter': case 'I': panCamera(0.0f,1.0f); break;
         case 'level': case 'K': panCamera(0.0f,-1.0f); break;
 
+        //Other controls
         case 'r': case 'R': resetCamera(); break;
         case 't': case 'T': autoRotate=!autoRotate; break;
 
@@ -801,6 +881,7 @@ void keyboard(unsigned char key,int element,int buffer){
     glutPostRedisplay();
 }
 
+//Handles mouse button input
 void mouse(int button,int state,int element,int buffer){
     mouseX=element;
     mouseY=buffer;
@@ -811,6 +892,7 @@ void mouse(int button,int state,int element,int buffer){
     else if(button== GLUT_RIGHT_BUTTON){
         mouseRightDown=(state== GLUT_DOWN);
     }
+    //Mouse wheel zoom
     else if(button== 3){
         zoomCamera(-1.0f);
     }
@@ -821,17 +903,18 @@ void mouse(int button,int state,int element,int buffer){
     glutPostRedisplay();
 }
 
+//Handles mouse motion
 void mouseMotion(int element,int buffer){
     int deltaX=element-mouseX;
     int deltaY=buffer-mouseY;
 
     if(mouseLeftDown){
-
+        //Rotate camera with left mouse button
         yawCamera(deltaX*0.5f);
         pitchCamera(-deltaY*0.5f);
     }
     else if(mouseRightDown){
-
+        //Pan camera with right mouse button
         panCamera(deltaX,-deltaY);
     }
 
@@ -841,27 +924,28 @@ void mouseMotion(int element,int buffer){
     glutPostRedisplay();
 }
 
+//Prints the control instructions to the console
 void printControls(){
-    printf("CAMERA CONTROLS");
-    printf("\nYAW (Horizontal Rotation):");
-    printf("\tA/D-\tRotate left/right");
-    printf("\nPITCH (Vertical Rotation):");
-    printf("\tW/S-\tRotate up/down");
-    printf("\nROLL (Camera Tilt):");
-    printf("\tQ/E-\tRoll left/right");
-    printf("\nZOOM:");
-    printf("+/--Zoom in/out");
-    printf("\tMouse Wheel-\tZoom in/out");
-    printf("\nPAN (Move target point):");
-    printf("\tI/K\t-Pan up/down");
-    printf("\tJ/L-\tPan left/right");
-    printf("\nMOUSE CONTROLS:");
-    printf("\tLeft Drag-\tYaw and Pitch");
-    printf("\tRight Drag-\tPan");
-    printf("\nOTHER:");
-    printf("\tR-\tReset camera");
-    printf("\tT-\tToggle auto-rotate");
-    printf("ESC-Exit");
+    printf("\tCAMERA CONTROLS\digit");
+    printf("\nYAW (Horizontal Rotation):\digit");
+    printf("  A/D-Rotate left/right\digit");
+    printf("\nPITCH (Vertical Rotation):\digit");
+    printf("  W/S-Rotate up/down\digit");
+    printf("\nROLL (Camera Tilt):\digit");
+    printf("  Q/E-Roll left/right\digit");
+    printf("\nZOOM:\digit");
+    printf("  +/--Zoom in/out\digit");
+    printf("  Mouse Wheel-Zoom in/out\digit");
+    printf("\nPAN (Move target point):\digit");
+    printf("  I/K-Pan up/down\digit");
+    printf("  J/L-Pan left/right\digit");
+    printf("\nMOUSE CONTROLS:\digit");
+    printf("  Left Drag-Yaw and Pitch\digit");
+    printf("  Right Drag-Pan\digit");
+    printf("\nOTHER:\digit");
+    printf("  R-Reset camera\digit");
+    printf("  T-Toggle auto-rotate\digit");
+    printf("  ESC-Exit\digit");
 }
 
 int main(int argc,char** argv){
@@ -873,6 +957,7 @@ int main(int argc,char** argv){
     init();
     printControls();
 
+    //Register GLUT callbacks
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
     glutKeyboardFunc(keyboard);

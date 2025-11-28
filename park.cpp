@@ -579,37 +579,33 @@ void drawTree(float element,float remaining){
 
     glPopMatrix();
 }
-
-//Draws a fountain at a specified position
-void drawFountain(float element,float remaining){
+//Draws the sun in the sky
+void drawSun(){
+    glDisable(GL_LIGHTING);
+    
     glPushMatrix();
-    glTranslatef(element,0,remaining);
-
-    //Base
-    glColor3f(0.6,0.6,0.6);
-    glPushMatrix();
-    glTranslatef(0,0.4,0);
-    drawCylinder(0.4,0.8);
+    glTranslatef(15, 25, -10);
+    
+    //Sun body
+    glColor3f(1.0, 1.0, 0.0);
+    glutSolidSphere(2.0, 30, 30);
+    
+    //Sun rays
+    glColor3f(1.0, 0.9, 0.0);
+    for(int i = 0; i < 12; i++){
+        glPushMatrix();
+        glRotatef(i * 30, 0, 0, 1);
+        glTranslatef(2.5, 0, 0);
+        glScalef(1.5, 0.3, 0.3);
+        glutSolidSphere(0.5, 10, 10);
+        glPopMatrix();
+    }
+    
     glPopMatrix();
-
-    //Water
-    glColor3f(0.4,0.6,0.8);
-    glPushMatrix();
-    glTranslatef(0,0.9,0);
-    glScalef(1,0.3,1);
-    glutSolidSphere(0.5,20,20);
-    glPopMatrix();
-
-    //Spout
-    glColor3f(0.7,0.7,0.7);
-    glPushMatrix();
-    glTranslatef(0,0.9,0);
-    glRotatef(90,1,0,0);
-    drawCylinder(0.05,0.3);
-    glPopMatrix();
-
-    glPopMatrix();
+    
+    glEnable(GL_LIGHTING);
 }
+
 
 //Draws a single fence post
 void drawFencePost(float data, float remaining){
@@ -837,8 +833,7 @@ void display(){
     drawTree(15,-15);
     drawTree(-15,-15);
 
-    drawFountain(5,-12);
-
+    drawSun();
     drawHUD();
 
     glutSwapBuffers();

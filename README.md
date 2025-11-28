@@ -11,5 +11,9 @@ g++ castle.cpp -IC:"\MinGW\freeglut\include" -LC:"\MinGW\freeglut\lib" -lfreeglu
 ## RUN TASK 3(mesh.cpp):
 g++ mesh.cpp -o mesh.exe
 
-## RUN TASK 4 & 5 (child.cpp):
+## RUN TASK 4 & 5 (park.cpp):
 g++ park.cpp -o park.exe -lfreeglut -lopengl32 -lglu32 "-IC:/msys64/mingw64/include" "-LC:/msys64/mingw64/lib"
+
+or
+
+g++ park.cpp -IC:"\MinGW\freeglut\include" -LC:"\MinGW\freeglut\lib" -lfreeglut -lopengl32 -lglu32 -o park.exe

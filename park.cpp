@@ -482,13 +482,37 @@ void drawMerryGoRound(){
     drawCylinder(2,0.2);
     glPopMatrix();
 
-    //Handles
-    glColor3f(0.0,0.5,1.0);
+    //Seats on the pole
+    float seatColors[4][3] = {
+        {1.0, 0.2, 0.2},  //Red
+        {0.2, 0.2, 1.0},  //Blue
+        {0.2, 1.0, 0.2},  //Green
+        {1.0, 0.8, 0.0}   //Yellow
+    };
+    
     for(int index=0; index < 4; index++){
         glPushMatrix();
         glRotatef(index*90,0,1,0);
-        glTranslatef(1.5,0.5,0);
-        drawCube(0.1,1,0.1);
+        glTranslatef(1.2,0.6,0);
+        
+        //Seat
+        glColor3f(seatColors[index][0], seatColors[index][1], seatColors[index][2]);
+        drawCube(0.5,0.15,0.5);
+        
+        //Seat back
+        glPushMatrix();
+        glTranslatef(0,0.3,-0.2);
+        drawCube(0.5,0.6,0.1);
+        glPopMatrix();
+        
+        //Connecting arm to pole
+        glColor3f(0.5,0.5,0.5);
+        glPushMatrix();
+        glTranslatef(-0.6,0,0);
+        glRotatef(90,0,0,1);
+        drawCylinder(0.05,2);
+        glPopMatrix();
+        
         glPopMatrix();
     }
 
